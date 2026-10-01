@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Consulta Caprina | Registro Individual</title>
+
+  <meta
+    name="description"
+    content="Sistema de consulta de hojas de vida y registros de producción caprina."
+  >
+
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">
+      <span class="brand-icon">🐐</span>
+      <span>
+        <strong>Consulta Caprina</strong>
+        <small>Gestión de información individual</small>
+      </span>
+    </a>
+
+    <span class="status">
+      <span class="status-dot"></span>
+      Sistema de consulta
+    </span>
+  </header>
+
+  <main class="container">
+    <section class="welcome">
+      <p class="eyebrow">SISTEMA DE INFORMACIÓN</p>
+      <h1>Registro individual de cabras</h1>
+      <p>
+        Consulta la hoja de vida, el historial reproductivo
+        y los registros de producción de cada sujeto.
+      </p>
+    </section>
+
+    <section class="search-panel">
+      <label for="subject-select">Seleccionar sujeto</label>
+
+      <div class="search-row">
+        <select id="subject-select">
+          <option value="">Cargando sujetos...</option>
+        </select>
+
+        <button id="search-button" type="button">
+          Consultar
+        </button>
+      </div>
+
+      <p id="search-help" class="help-text">
+        Selecciona un sujeto para consultar su información.
+      </p>
+    </section>
+
+    <section id="subject-content" hidden>
+      <div id="subject-summary" class="subject-summary"></div>
+
+      <nav id="section-navigation" class="section-navigation"
+           aria-label="Secciones del registro">
+      </nav>
+
+      <div id="subject-details" class="subject-details"></div>
+    </section>
+
+    <section id="loading-state" class="message-panel">
+      <div class="loading-icon">🐐</div>
+      <h2>Preparando la información</h2>
+      <p>Estamos cargando los registros disponibles.</p>
+    </section>
+
+    <section id="error-state" class="message-panel" hidden>
+      <h2>No se pudo cargar la información</h2>
+      <p id="error-message">
+        Comprueba que los archivos de datos estén disponibles.
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Consulta Caprina · Sistema de registros individuales</p>
+  </footer>
+</body>
+</html>

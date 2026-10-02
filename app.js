@@ -41,19 +41,30 @@ function escapeHTML(value) {
   });
 }
 
+
+function isEmptyValue(value) {
+  if (value === null || value === undefined) return true;
+
+  const text = String(value).trim();
+
+  return (
+    text === "" ||
+    text.toLowerCase() === "sin información" ||
+    text.toLowerCase() === "sin informacion"
+  );
+}
+
 function displayValue(value) {
-  if (value === null || value === undefined || value === "") {
-    return "Sin información";
-  }
+  if (isEmptyValue(value)) return "";
 
   if (typeof value === "boolean") {
     return value ? "Sí" : "No";
   }
 
   if (Array.isArray(value)) {
-    return value.length
-      ? value.map(displayValue).join(", ")
-      : "Sin información";
+    return value.filter((item) => !isEmptyValue(item))
+      .map(displayValue)
+      .join(", ");
   }
 
   if (typeof value === "object") {
@@ -220,12 +231,13 @@ function renderSummary(subject) {
     ? subject.summaryFields
     : [];
 
-  const extraFields = fields.map((field) => `
+  
+const extraFields = fields
+  .filter((field) => !isEmptyValue(field.value))
+  .map((field) => `
     <div class="field-card">
       <span class="field-label">${escapeHTML(field.label)}</span>
-      <span class="field-value ${
-        field.value === "" || field.value == null ? "empty" : ""
-      }">${escapeHTML(displayValue(field.value))}</span>
+      <span class="field-value">${escapeHTML(displayValue(field.value))}</span>
     </div>
   `).join("");
 
@@ -339,26 +351,26 @@ function renderSections(subject) {
    Campos individuales
    ----------------------------------------- */
 
+
 function renderFields(fields) {
   if (!Array.isArray(fields) || fields.length === 0) {
     return "";
   }
 
+  const filledFields = fields.filter(
+    (field) => !isEmptyValue(field.value)
+  );
+
+  if (filledFields.length === 0) return "";
+
   return `
     <div class="field-grid">
-      ${fields.map((field) => {
-        const value = field.value;
-        const empty = value === "" || value === null || value === undefined;
-
-        return `
-          <div class="field-card">
-            <span class="field-label">${escapeHTML(field.label)}</span>
-            <span class="field-value ${empty ? "empty" : ""}">${
-              escapeHTML(displayValue(value))
-            }</span>
-          </div>
-        `;
-      }).join("")}
+      ${filledFields.map((field) => `
+        <div class="field-card">
+          <span class="field-label">${escapeHTML(field.label)}</span>
+          <span class="field-value">${escapeHTML(displayValue(field.value))}</span>
+        </div>
+      `).join("")}
     </div>
   `;
 }
@@ -366,6 +378,7 @@ function renderFields(fields) {
 /* -----------------------------------------
    Tablas
    ----------------------------------------- */
+
 
 function renderTables(tables) {
   if (!Array.isArray(tables) || tables.length === 0) {
@@ -376,23 +389,37 @@ function renderTables(tables) {
     const columns = Array.isArray(table.columns) ? table.columns : [];
     const rows = Array.isArray(table.rows) ? table.rows : [];
 
-    const headerHTML = columns.map((column) => `
-      <th scope="col">${escapeHTML(column)}</th>
+    const normalizedRows = rows.map((row) =>
+      Array.isArray(row)
+        ? row
+        : columns.map((column) => row?.[column])
+    );
+
+    const usefulColumns = columns
+      .map((column, columnIndex) => columnIndex)
+      .filter((columnIndex) =>
+        normalizedRows.some((row) => !isEmptyValue(row[columnIndex]))
+      );
+
+    const usefulRows = normalizedRows.filter((row) =>
+      usefulColumns.some((columnIndex) => !isEmptyValue(row[columnIndex]))
+    );
+
+    if (usefulColumns.length === 0 || usefulRows.length === 0) {
+      return "";
+    }
+
+    const headerHTML = usefulColumns.map((columnIndex) => `
+      <th scope="col">${escapeHTML(columns[columnIndex])}</th>
     `).join("");
 
-    const rowsHTML = rows.map((row) => {
-      const values = Array.isArray(row)
-        ? row
-        : columns.map((column) => row?.[column]);
-
-      return `
-        <tr>
-          ${values.map((value) => `
-            <td>${escapeHTML(displayValue(value))}</td>
-          `).join("")}
-        </tr>
-      `;
-    }).join("");
+    const rowsHTML = usefulRows.map((row) => `
+      <tr>
+        ${usefulColumns.map((columnIndex) => `
+          <td>${escapeHTML(displayValue(row[columnIndex]))}</td>
+        `).join("")}
+      </tr>
+    `).join("");
 
     return `
       <div class="table-block" style="margin-top:20px">
@@ -410,7 +437,7 @@ function renderTables(tables) {
         </div>
 
         <p class="table-caption">
-          ${rows.length} fila(s) · ${columns.length} columna(s)
+          ${usefulRows.length} fila(s) con datos · ${usefulColumns.length} columna(s) con datos
         </p>
       </div>
     `;

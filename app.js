@@ -304,44 +304,49 @@ function renderNavigation(subject) {
    Secciones completas
    ----------------------------------------- */
 
+
 function renderSections(subject) {
-  const sections = Array.isArray(subject.sections)
-    ? subject.sections
-    : [];
+  const sections = Array.isArray(subject.sections) ? subject.sections : [];
 
-  subjectDetails.innerHTML = sections.map((section, index) => {
-    const id = safeId(section.id || section.title || `seccion-${index + 1}`);
+  if (sections.length === 0) {
+    return `
+      <div class="empty-state">
+        No hay documentos disponibles para este registro.
+      </div>
+    `;
+  }
 
-    const fieldsHTML = renderFields(section.fields);
-    const tablesHTML = renderTables(section.tables);
-    const imagesHTML = renderImages(section.images);
-    const notesHTML = renderNotes(section.notes);
+  return sections.map((section) => {
+    const sectionId = String(section.id || "");
+    const match = sectionId.match(/^(Hojas_Vida|Leche_Cabras)-(\d+)$/);
+    const title = section.title || section.name || sectionId || "Documento";
 
-    const extraHTML = section.content
-      ? `<div class="field-value">${escapeHTML(section.content)}</div>`
-      : "";
+    if (!match) {
+      return `
+        <section class="document-section">
+          <h2>${escapeHtml(title)}</h2>
+          <p>El PDF de esta hoja todavía no está disponible.</p>
+        </section>
+      `;
+    }
 
-    const body = [
-      fieldsHTML,
-      tablesHTML,
-      imagesHTML,
-      notesHTML,
-      extraHTML
-    ].filter(Boolean).join("");
+    const pdfPath =
+      `datos/documentos/${match[1]}_hoja${match[2]}.pdf`;
 
     return `
-      <section class="data-section" id="${escapeHTML(id)}">
-        <div class="section-heading">
-          <div class="section-icon">📋</div>
-          <div>
-            <h2>${escapeHTML(section.title || `Sección ${index + 1}`)}</h2>
-            ${section.description
-              ? `<p>${escapeHTML(section.description)}</p>`
-              : ""}
-          </div>
-        </div>
-
-        ${body || '<p class="help-text">Esta sección no tiene contenido procesado.</p>'}
+      <section class="document-section">
+        <h2>${escapeHtml(title)}</h2>
+        <p>
+          <a href="${pdfPath}" target="_blank" rel="noopener">
+            Abrir PDF en otra pestaña
+          </a>
+        </p>
+        <iframe
+          src="${pdfPath}#view=FitH"
+          title="${escapeHtml(title)}"
+          style="width:100%; height:75vh; min-height:650px; border:1px solid #ddd; border-radius:8px;"
+          loading="lazy">
+        </iframe>
       </section>
     `;
   }).join("");

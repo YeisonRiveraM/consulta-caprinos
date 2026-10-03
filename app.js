@@ -185,9 +185,10 @@ function renderSelectedSubject() {
 
   const subject = subjects[Number(index)];
 
+
   renderSummary(subject);
   renderNavigation(subject);
-  renderSections(subject);
+  subjectDetails.innerHTML = renderSections(subject);
 
   subjectContent.hidden = false;
   searchHelp.textContent =
@@ -323,7 +324,9 @@ function renderSections(subject) {
 
     if (!match) {
       return `
-        <section class="document-section">
+        <section
+          class="document-section"
+          id="${escapeHTML(safeId(sectionId))}">
           <h2>${escapeHTML(title)}</h2>
           <p>El PDF de esta hoja todavía no está disponible.</p>
         </section>

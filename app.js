@@ -290,13 +290,32 @@ function renderNavigation(subject) {
     `;
   }).join("");
 
+
+
   sectionNavigation.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+
       sectionNavigation.querySelectorAll("a").forEach((item) => {
         item.classList.remove("active");
       });
 
       link.classList.add("active");
+
+      const targetId = decodeURIComponent(link.hash.slice(1));
+
+      subjectDetails.querySelectorAll(".document-section").forEach((section) => {
+        section.hidden = section.id !== targetId;
+      });
+
+      const targetSection = document.getElementById(targetId);
+
+      if (targetSection) {
+        targetSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
     });
   });
 }
@@ -317,16 +336,17 @@ function renderSections(subject) {
     `;
   }
 
-  return sections.map((section) => {
+ return sections.map((section, index) => {
     const sectionId = String(section.id || "");
     const match = sectionId.match(/^(Hojas_Vida|Leche_Cabras)-(\d+)$/);
     const title = section.title || section.name || sectionId || "Documento";
 
     if (!match) {
-      return `
+      return `      
         <section
           class="document-section"
-          id="${escapeHTML(safeId(sectionId))}">
+          id="${escapeHTML(safeId(sectionId))}"
+          ${index === 0 ? "" : "hidden"}>
           <h2>${escapeHTML(title)}</h2>
           <p>El PDF de esta hoja todavía no está disponible.</p>
         </section>

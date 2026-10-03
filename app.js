@@ -324,7 +324,7 @@ function renderSections(subject) {
     if (!match) {
       return `
         <section class="document-section">
-          <h2>${escapeHtml(title)}</h2>
+          <h2>${escapeHTML(title)}</h2>
           <p>El PDF de esta hoja todavía no está disponible.</p>
         </section>
       `;
@@ -335,7 +335,7 @@ function renderSections(subject) {
 
     return `
       <section class="document-section">
-        <h2>${escapeHtml(title)}</h2>
+        <h2>${escapeHTML(title)}</h2>
         <p>
           <a href="${pdfPath}" target="_blank" rel="noopener">
             Abrir PDF en otra pestaña
@@ -343,7 +343,7 @@ function renderSections(subject) {
         </p>
         <iframe
           src="${pdfPath}#view=FitH"
-          title="${escapeHtml(title)}"
+          title="${escapeHTML(title)}"
           style="width:100%; height:75vh; min-height:650px; border:1px solid #ddd; border-radius:8px;"
           loading="lazy">
         </iframe>
